@@ -1,88 +1,60 @@
-const {readFile, writeFile} = require('fs')
+const {writeFileAsync, readFileAsync} = require('../utils')
+//引入 config 模块
 const config = require('../config')
+//引入 axios 模块
 const axios = require('axios');
+//引入 api 模块
+const Api = require('./../utils/api');
+//引入 menu 模块
+const menu = require('./menu');
 
-// 用于存取 accessToke 的文件名；
-const tokenFileName = 'accessToken.text';  
-const baseUrl="https://api.weixin.qq.com/";
-const WxApi={
-    accessToken:baseUrl+"cgi-bin/token?grant_type=client_credential"
-}
 class Wechat {
   constructor(opts){
-    
   }
 
   // 获取access_token 
   getAccessToken () {
-    // 参数
-    const {appId, appsecret} = config;
-    // 请求地址
-    const url = `${WxApi}&appid=${appId}&secret=${appsecret}`;
-
+    const {appId, appsecret} = config; // 参数
+    const url = `${Api.accessToken}&appid=${appId}&secret=${appsecret}`; // 请求地址
     // 用 promise 将回调函数中的数据返回出去
     return new Promise((resolve, reject)=>{
       axios.get(url).then(res => {
-        // 请求成功
-        console.log('axios', res)
-        //重新赋值凭据的过期时间 ： 当前时间 + (7200 - 5分钟) * 1000
+        console.log('getAccessToken成功', res.data)
+        //设置access_token的过期时间 ： 当前时间 + (7200 - 5分钟) * 1000
         res.data.expires_in = Date.now() + (res.data.expires_in - 300) * 1000;
-      })
-      .catch(err => {
+        resolve(res.data)
+      }).catch(err => {
         // 请求失败
-        reject('getAccessToken 方法出问题' + err);
+        reject('getAccessToken 错误：' + err);
       })
     })
   }
 
-  // 将凭据保存为一个文件
-  saveAccessToken () {
-    return new Promise((resolve, reject) => {
-      // 将凭据保存为一个文件
-      writeFile(tokenFileName, data, err => {
-        if(!err) {
-          //写入成功
-          resolve();
-        }else {
-          //写入失败
-          reject('saveAccessToken:' + err)
-        }
-      })
-    })
+  // 创建写入 access_token.txt
+  saveAccessToken (accessToken) {
+    return writeFileAsync(accessToken,'access_token.txt')
   }
 
-  // 读取凭据
+  // 读取凭据 access_token
   readAccessToken () {
-    return new Promise((resolve, reject) => {
-      readFile(tokenFileName, (err, data) => {
-        if(!err) {
-          // 将读写的 Buffer 数据转化为 json 字符串
-          data = data.toString();
-          // 将 json 字符串转化为对象
-          data = JSON.parse(data);
-          // 读取成功
-          resolve(data);
-        }else {
-          // 读取失败
-          reject('readAccessToken:'+ err)
-        }
-      })
-    })
+    return readFileAsync('access_token.txt')
   }
 
   // 判断凭据是否过期 （未过期 true; 过期 false）
   isValidAccessToken(data) {
-
     if(!data || !data.access_token || !data.expires_in) return false;
     // 判断是否过期
     return data.expires_in > Date.now();
   }
 
+  // 用来获取没有过期的access_token
   fetchAccessToken () {
-    console.log(this);
+    console.log('this',this);
     if(this.access_token && this.expires_in && this.isValidAccessToken(this)) {
-      let obj = {access_token: this.access_token, expires_in: this.expires_in};
-      return Promise.resolve(obj);
+      return Promise.resolve({
+        access_token: this.access_token, 
+        expires_in: this.expires_in
+      });
     }
     return this.readAccessToken()
       .then(async res => {
@@ -114,6 +86,32 @@ class Wechat {
         //指定fetchAccessToken方法返回值
         return Promise.resolve(res);
       })
+  }
+
+
+  /**
+   * 用来创建自定义菜单
+   * @param menu 菜单配置对象
+   * @return {Promise<any>}
+   */
+  createMenu(menu) {
+    return new Promise(async (resolve,reject) => {
+      // try{
+        //  获取access_token
+        const data = await this.fetchAccessToken();
+        // 请求地址
+        const url = `${Api.menu.create}access_token=${data.access_token}`;
+        //发送请求
+        const headers = {headers:{'Content-Type': 'application/json'}}
+        axios.post(url, menu,headers).then(res => {
+          console.log(res)
+        })
+        // const res = await axios.post(url, menu,headers)
+        // console.log(res.data)
+      // } catch(e) {
+      //   reject('deleteMenu方法出了问题：' + e);
+      // }
+    })
   }
 }
 
