@@ -4,15 +4,21 @@ const axios = require('axios');
 
 // 用于存取 accessToke 的文件名；
 const tokenFileName = 'accessToken.text';  
-
+const baseUrl="https://api.weixin.qq.com/";
+const WxApi={
+    accessToken:baseUrl+"cgi-bin/token?grant_type=client_credential"
+}
 class Wechat {
+  constructor(opts){
+    
+  }
 
   // 获取access_token 
   getAccessToken () {
     // 参数
     const {appId, appsecret} = config;
     // 请求地址
-    const url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appId}&secret=${appsecret}`;
+    const url = `${WxApi}&appid=${appId}&secret=${appsecret}`;
 
     // 用 promise 将回调函数中的数据返回出去
     return new Promise((resolve, reject)=>{
