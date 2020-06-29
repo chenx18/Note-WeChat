@@ -3,35 +3,29 @@
 module.exports = {
   "button":[
     {
-      "type": "click", 
-      "name": "今日特惠", 
-      "sub_button": [ ]
+      "type":"view",
+      "name":"硅谷电影🎬",
+      "url":`https://www.baidu.com/`
     },
     {
       "type":"view",
       "name":"语音识别🎤",
-      "url":``
+      "url":`https://www.baidu.com/`
     },
     {
-      "type": "click", 
-      "name": "更多", 
-      "sub_button": [ 
+      "name": "戳我💋",
+      "sub_button": [
         {
           "type": "view",
-          "name": "新闻",
+          "name": "官网☀",
           "url": "http://www.atguigu.com"
         },
         {
-          "type": "view",
-          "name": "房产",
-          "url": "http://www.atguigu.com"
-        },
-        {
-          "type": "view",
-          "name": "金融",
-          "url": "http://www.atguigu.com"
-        },
+          "type": "click",
+          "name": "帮助🙏",
+          "key": "help"
+        }
       ]
-    },
+    }
   ]
 }

@@ -6,8 +6,7 @@ const {getUserDataAsync, parseXMLAsync, formatMessage} = require('../utils');
 const reply = require('./reply');
 //引入template模块
 const template = require('./template');
-// 引入 wechat 模块
-const Wechat = require('./wechat');
+const {writeFileAsync, readFileAsync} = require('../utils')
 
 
 
@@ -20,13 +19,11 @@ const Wechat = require('./wechat');
 * sha1: 一种加密算法 需要安装 npm install sha1 --save
 */
 module.exports = () => { 
-  //创建实例对象
-  const wechatApi = new Wechat();
-  wechatApi.fetchAccessToken();
-  // wechatApi.createMenu();
   return async (ctx, next) => {
+    // console.log('ctx.request',ctx.request)
+    // console.log('ctx.query',ctx.query)
+    // console.log('ctx.req',ctx.req)
     const { token } = config
-
     // 1. 接收微信服务器参数
     const { signature, nonce, timestamp, echostr } = ctx.query;
 

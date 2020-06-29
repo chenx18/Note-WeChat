@@ -6,12 +6,12 @@ const axios = require('axios');
 //引入 api 模块
 const Api = require('./../utils/api');
 //引入 menu 模块
-const menu = require('./menu');
+const menus = require('./menu');
 
 class Wechat {
   constructor(opts){
   }
-
+  // --------------------- access_token ------------------------------
   // 获取access_token 
   getAccessToken () {
     const {appId, appsecret} = config; // 参数
@@ -88,6 +88,13 @@ class Wechat {
       })
   }
 
+  // --------------------- ticket ------------------------------\
+  /**
+   * 获取jsapi_ticket
+   */
+  getTicket() {
+    return new Promise(async )
+  }
 
   /**
    * 用来创建自定义菜单
@@ -96,23 +103,59 @@ class Wechat {
    */
   createMenu(menu) {
     return new Promise(async (resolve,reject) => {
-      // try{
-        //  获取access_token
-        const data = await this.fetchAccessToken();
-        // 请求地址
-        const url = `${Api.menu.create}access_token=${data.access_token}`;
-        //发送请求
-        const headers = {headers:{'Content-Type': 'application/json'}}
-        axios.post(url, menu,headers).then(res => {
-          console.log(res)
-        })
-        // const res = await axios.post(url, menu,headers)
-        // console.log(res.data)
-      // } catch(e) {
-      //   reject('deleteMenu方法出了问题：' + e);
-      // }
+      //  获取access_token
+      const token = await this.fetchAccessToken();
+      // 请求地址
+      const url = `${Api.menu.create}access_token=${token.access_token}`;
+      //发送请求
+      const headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+      axios.post(url, menu, headers).then(res => {
+        let data = res.data;
+        if(data.errcode === 0) {
+          resolve()
+          console.log('createMenu Res',data)
+        } else {
+          throw new Error(JSON.stringify(data));
+        }
+      })
+      .catch(err => {
+        reject('createMenu Err:' + err);
+      })
+      
+    })
+  }
+  /**
+   * 用来删除自定义菜单的
+   * @return {Promise<any>}
+   */
+  deleteMenu() {
+    return new Promise(async (resolve, reject) => {
+      const token = await this.fetchAccessToken();
+      // 定义请求地址
+      const url = `${Api.menu.delete}access_token=${token.access_token}`;
+      // 发送请求
+      axios.get(url).then(res => {
+        let data = res.data;
+        if(data.errcode === 0){
+          resolve()
+          console.log('deleteMenu res',data)
+        } else {
+          throw new Error(JSON.stringify(data));
+        }
+      }).catch(err => {
+        console.log('deleteMenu Err'+ err)
+        reject('createMenu Err:' + err);
+      });
     })
   }
 }
+(async () => {
+ //创建实例对象
+ const w = new Wechat();
+//  await w.fetchAccessToken();
+ await w.deleteMenu();
+ await w.createMenu(menus);
 
+})()
+    
 module.exports = Wechat;
