@@ -1,8 +1,10 @@
+
+//引入 axios 模块
+const axios = require('axios');
+// 引入封装好的读写文件方法
 const {writeFileAsync, readFileAsync} = require('../utils')
 //引入 config 模块
 const config = require('../config')
-//引入 axios 模块
-const axios = require('axios');
 //引入 api 模块
 const Api = require('./../utils/api');
 //引入 menu 模块
@@ -88,14 +90,101 @@ class Wechat {
       })
   }
 
-  // --------------------- ticket ------------------------------\
+  // --------------------- ticket ------------------------------
   /**
    * 获取jsapi_ticket
    */
   getTicket() {
-    return new Promise(async )
+    return new Promise(async (resolve, reject) => {
+      // 获取access_token
+      const {access_token} = await this.fetchAccessToken();
+      // 定义请求地址
+      const url = `${Api.ticket}&access_token=${access_token}`;
+      axios.get(url).then(res => {
+        let data = res.data;
+        console.log('getTicket', data);
+        //将promise对象状态改成成功的状态
+        resolve({
+          ticket: data.ticket,
+          expires_in: Date.now() + (data.expires_in - 300) * 1000
+        });
+      }).catch(err => {
+        reject('getTicket err', err)
+      })
+    } )
   }
 
+  /**
+   * 用来保存jsapi_ticket
+   * @param ticket 要保存的票据
+   */
+  saveTicket (ticket) {
+    return writeFileAsync(ticket, 'ticket.txt');
+  }
+
+   /**
+   * 用来读取ticket
+   */
+  readTicket () {
+    return readFileAsync('ticket.txt');
+  }
+
+   /**
+   * 用来检测ticket是否有效的
+   * @param data
+   */
+  isValidTicket (data) {
+    // 检测传入的参数是否有效的
+    if(!data && !data.ticket && !data.expires_in) {
+      // ticket 无效
+      return false; 
+    }
+    return data.expires_in > Date.now();
+  }
+
+  /**
+   * 用来获取没有过期的ticket
+   * @return {Promise<any>} ticket
+   */
+  fetchTicket () {
+    if(this.ticket && this.ticket_expires_in && this.isValidTicket()){
+      // 说明之前保存过 ticket 并且有效
+      return Promise.resolve({
+        ticket: this.ticket,
+        expires_in: this.ticket_expires_in
+      })
+    }
+    return this.readTicket()
+    .then(async res => {
+      // 本地有文件
+      // 判断是否过期
+      if (this.isValidTicket(res)){
+        // 有效
+        return Promise.resolve(res)
+      }else{
+        // 过期了
+        const res = await this.getTicket();
+        await this.saveTicket(res);
+        return Promise.resolve(res);
+      }
+    })
+    .catch(async err => {
+      // 本地没有文件
+      const res = await this.getTicket();
+      await this.saveTicket(res);
+      return Promise.resolve(res);   
+    })
+    .then(res => {
+      // 将ticket 挂载到this 上
+      this.ticket = res.ricket;
+      this.ticket_expires_in = res.expires_in
+      // /返回res包装了一层promise对象（此对象为成功的状态）
+      return Promise.resolve(res)
+    })
+  
+  }
+  
+// ------------------自定义菜单-------------------------
   /**
    * 用来创建自定义菜单
    * @param menu 菜单配置对象
@@ -124,6 +213,7 @@ class Wechat {
       
     })
   }
+
   /**
    * 用来删除自定义菜单的
    * @return {Promise<any>}
@@ -149,13 +239,14 @@ class Wechat {
     })
   }
 }
-(async () => {
- //创建实例对象
- const w = new Wechat();
-//  await w.fetchAccessToken();
- await w.deleteMenu();
- await w.createMenu(menus);
 
-})()
+// (async () => {
+//  //创建实例对象
+//  const w = new Wechat();
+// //  await w.fetchAccessToken();
+//  await w.deleteMenu();
+//  await w.createMenu(menus);
+
+// })()
     
 module.exports = Wechat;

@@ -1,11 +1,11 @@
 // 自定义菜单
-
+const {url} = require('./../config')
 module.exports = {
   "button":[
     {
       "type":"view",
       "name":"硅谷电影🎬",
-      "url":`https://www.baidu.com/`
+      "url":`${url}/search`
     },
     {
       "type":"view",

@@ -6,18 +6,19 @@ const {getUserDataAsync, parseXMLAsync, formatMessage} = require('../utils');
 const reply = require('./reply');
 //引入template模块
 const template = require('./template');
-const {writeFileAsync, readFileAsync} = require('../utils')
 
-
-
-/*
- 验证服务器地址的有效性
-* signature: 微信的加密签名，结合你的token，timestamp和nonce经过某种算法生成的
-* echostr: 随机字符串，微信后台随机生成的
-* timestamp: 时间戳，对应当前时间
-* nonce: 随机数，微信后台随机生成的
-* sha1: 一种加密算法 需要安装 npm install sha1 --save
-*/
+/**
+ * 微信服务器会发送两种类型的消息给开发者服务器
+ *  1.GET请求
+ *    - 验证服务器的有效性
+ *      - signature: 微信的加密签名，结合你的token，timestamp和nonce经过某种算法生成的
+ *      - echostr: 随机字符串，微信后台随机生成的
+ *      - timestamp: 时间戳，对应当前时间
+ *      - nonce: 随机数，微信后台随机生成的
+ *      - sha1: 一种加密算法 需要安装 npm install sha1 --save
+ *  2.POST请求
+ *      -微信服务器会将用户发送的数据以post请求的方式转发到开发者服务器上
+ */
 module.exports = () => { 
   return async (ctx, next) => {
     // console.log('ctx.request',ctx.request)
@@ -37,7 +38,7 @@ module.exports = () => {
       if (ctx.request.method==="GET") {
         ctx.body = echostr
       } 
-      // 接收到用户发来的消息，解析并回复
+      // 接收到用户发来的消息，以post请求的方式转发到开发者服务器上，解析并回复
       else if(ctx.request.method==="POST"){
         // 1. 获取用户的消息，返回的数据格式是xml
         const xmlData = await getUserDataAsync(ctx.req);
@@ -64,6 +65,7 @@ module.exports = () => {
       
     }else{
       ctx.body = 'wrong'
+      await next();
     }
   }
 }

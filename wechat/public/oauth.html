@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://libs.cdnjs.net/zepto/1.2.0/zepto.min.js"></script>
+    <script src="http://res2.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+</head>
+
+<body>
+    <div>
+        <button id="oauth">获取用户信息</button>
+        <div id="userInfo"></div>
+    </div>
+    <script>
+        $(function() {
+            //获取url参数
+            function getQueryVariable(variable) {
+                var query = window.location.search.substring(1);
+                var vars = query.split("&");
+                for (var i = 0; i < vars.length; i++) {
+                    var pair = vars[i].split("=");
+                    if (pair[0] == variable) {
+                        return pair[1];
+                    }
+                }
+                return (false);
+            }
+
+            var userinfo = JSON.parse(localStorage.getItem("userinfo"));
+
+            // console.log(userinfo)
+
+            if (userinfo) {
+                $("#oauth").hide();
+                var html = `
+                            <image src="${userinfo.headimgurl}"/>
+                            <h2>你已经登录</h2>
+                            `;
+                $("#userInfo").html(html);
+                return;
+            }
+
+            $("#oauth").on("click", function() {
+                location.href = "http://caorui.max.svipss.top/oauth";
+            })
+
+            var code = getQueryVariable("code");
+            if (code) {
+                $.ajax({
+                    url: "http://caorui.max.svipss.top/getUserInfo",
+                    data: {
+                        code
+                    },
+                    success: function(data) {
+                        $("#oauth").hide();
+                        // console.log(data)
+                        localStorage.setItem("userinfo", JSON.stringify(data));
+                        var html = `
+                                <image src="${data.headimgurl}"/>
+                                <p>nickname:${data.nickname}</p>
+                                <p>country:${data.country}</p>
+                                <p>province:${data.province}</p>
+                                <p>city:${data.city}</p>
+                                <p>openid:${data.openid}</p>
+                            `
+                        $("#userInfo").html(html)
+                    }
+                })
+            }
+
+
+        })
+    </script>
+</body>
+
+</html>
