@@ -13,8 +13,8 @@
 const config ={
   appId: 'wxc22a0d730e120c45',
   appsecret: 'a846e1dbe7262c1fc67e1d8b14f16966',
-  token: 'weixinCourse',
-  url: 'https://2232bf6e9d0e.ngrok.io', 
+  token: 'jsdh2342d',
+  url: 'https://b69d273d34ae.ngrok.io', 
 }
 
 

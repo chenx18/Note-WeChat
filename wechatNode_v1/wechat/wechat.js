@@ -240,13 +240,13 @@ class Wechat {
   }
 }
 
-// (async () => {
-//  //创建实例对象
-//  const w = new Wechat();
-// //  await w.fetchAccessToken();
-//  await w.deleteMenu();
-//  await w.createMenu(menus);
+(async () => {
+ //创建实例对象
+ const w = new Wechat();
+//  await w.fetchAccessToken();
+ await w.deleteMenu();
+ await w.createMenu(menus);
 
-// })()
+})()
     
 module.exports = Wechat;
