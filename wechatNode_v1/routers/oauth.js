@@ -8,7 +8,7 @@ router.get('/oauth', async (ctx, next) => {
 
   if(!ctx.query.code && !ctx.query.state) {
     //首次进入，需要跳转到scopeurl 来获取 code
-    let curUrl ='http://192.168.14.17:8082'
+    let curUrl ='http://192.168.5.189:8082'
     let scopeUrl = generatorScopeUrl(curUrl, 'info')
     ctx.status = 302;
     console.log(scopeUrl)

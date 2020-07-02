@@ -9,7 +9,7 @@ module.exports = {
     },
     {
       "type":"view",
-      "name":"语音识别3",
+      "name":"语音识别",
       "url":`${url}/oauth`
     },
     {
