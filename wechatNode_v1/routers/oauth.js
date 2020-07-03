@@ -4,8 +4,19 @@ const {appId} = require('../config')
 const axios = require('axios');
 
 //微信网页授权获取code
-router.get('/oauth', async (ctx, next) => {
-
+router.get('/wxAuthorize', async (ctx, next) => {
+  const state = ctx.query.appId
+  console.log(`ctx...` + ctx.href)
+  let redirectUrl = ctx.href
+  redirectUrl = redirectUrl.replace('wxAuthorize','wxCallback')
+  redirectUrl = 'http://192.168.5.189:8082/wxCallback'
+  // console.log(`redirectUrl...` + redirectUrl)
+  const scope = 'snsapi_userinfo';
+  const url = 'https://open.weixin.qq.com/connect/oauth2/authorize?'
+  +`appid=${appId}&redirect_uri=${redirectUrl}&response_type=code&scope=${scope}&state=${state}#wechat_redirect`
+  console.log('url...' + url)
+  ctx.redirect(url)
+  return
   if(!ctx.query.code && !ctx.query.state) {
     //首次进入，需要跳转到scopeurl 来获取 code
     let curUrl ='http://192.168.5.189:8082'
@@ -33,30 +44,13 @@ router.get('/oauth', async (ctx, next) => {
   }
 })
 
-router.get('/wxtoken', async (ctx,next) => {
+router.get('/wxCallback', async (ctx,next) => {
+  console.log(ctx.query)
   //用户同意授权
   let code = ctx.query.code; 
+  
 })
 
-function generatorScopeUrl (url, type) {
-  if(!url) return false;
-  let scopeType = 'snsapi_base';
-  if(type == 'info') scopeType = 'snsapi_userinfo';
-  let state = 'userstate'; //自定义字符串
-  return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${url}&response_type=code&scope=${scopeType}&state=${state}#wechat_redirect `
-}
-
-// 获取UserInfo
-function getUserInfo (url) {
-  return new Promise((resolve, reject)=>{
-    axios.get(url).then(res => {
-      console.log('getUserInfo', res.data)
-      resolve(res.data)
-    }).catch(err => {
-      reject('getUserInfo 错误：' + err);
-    })
-  })
-}
 
 
 module.exports = router

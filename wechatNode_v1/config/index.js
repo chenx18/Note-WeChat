@@ -14,7 +14,7 @@ const config ={
   appId: 'wxc22a0d730e120c45',
   appsecret: 'a846e1dbe7262c1fc67e1d8b14f16966',
   token: 'jsdh2342d',
-  url: 'https://d8c297a1dbbf.ngrok.io', 
+  url: 'https://43cb689975fb.ngrok.io', 
 }
 
 

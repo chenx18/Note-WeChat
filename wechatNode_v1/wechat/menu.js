@@ -9,8 +9,8 @@ module.exports = {
     },
     {
       "type":"view",
-      "name":"语音识别",
-      "url":`${url}/oauth`
+      "name":"语音识别1",
+      "url":`${url}/wxAuthorize`
     },
     {
       "name": "戳我4",
